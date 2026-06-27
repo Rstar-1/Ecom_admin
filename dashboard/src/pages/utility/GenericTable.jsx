@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import Pagination from "./GenericPagination";
+import GenericButton from "./GenericButton";
 
 const GenericTable = ({
   columns = [],
@@ -74,12 +75,8 @@ const GenericTable = ({
             style={{ width: "250px", borderRadius: "5px" }}
           />
           {showExport && (
-            <button
-              onClick={onExport}
-              className="bg-primary px-20 py-7 rounded-5 text-white border-0"
-            >
-              Export Excel
-            </button>
+           <GenericButton version="v1" text="Export Data"
+              onClick={onExport} />
           )}
         </div>
       </div>

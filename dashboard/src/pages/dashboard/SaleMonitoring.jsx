@@ -182,7 +182,7 @@ const SaleMonitoring = () => {
                     ],
                   },
                 ]}
-                colors={["var(--primary)"]}
+                colors={["var(--secondary)"]}
                 height={380}
                 options={{
                   chart: {
@@ -288,7 +288,7 @@ const SaleMonitoring = () => {
 
           <div className="grid-cols-4 gap-12">
             <div className="bg-white rounded-5 px-12 py-29">
-              <h4 className="large-text text-primary font-600 text-center">
+              <h4 className="large-text text-secondary font-600 text-center">
                 23
               </h4>
               <p className="small-text text-center capitalize text-gray mt-5 font-500">
@@ -339,7 +339,7 @@ const SaleMonitoring = () => {
                 "#a855f7",
                 "#3b82f6",
                 "#f97316",
-                "var(--primary)",
+                "var(--secondary)",
               ]}
               options={{
                 chart: {

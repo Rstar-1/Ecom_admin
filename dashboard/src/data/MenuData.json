@@ -1,0 +1,90 @@
+[
+  {
+    "name": "Dashboard",
+    "icon": "Dashboard",
+    "status": true,
+    "role": ["Dev-Admin", "Admin"],
+    "route": "/dashboard",
+    "category": []
+  },
+  {
+    "name": "Web Analytics",
+    "icon": "Google Analytic",
+    "status": true,
+    "role": ["Dev-Admin", "Admin"],
+    "route": "/analytics",
+    "category": []
+  },
+  {
+    "name": "Product Catalog",
+    "icon": "Product",
+    "status": true,
+    "role": ["Dev-Admin", "Admin"],
+    "route": "/management/product",
+    "category": []
+  },
+  {
+    "name": "Github Repository",
+    "icon": "Github",
+    "status": true,
+    "role": ["Dev-Admin", "Admin"],
+    "route": "/management/github",
+    "category": []
+  },
+  {
+    "name": "Content Management",
+    "icon": "CMS",
+    "status": true,
+    "role": ["Dev-Admin", "Admin"],
+    "route": "/management/cms",
+    "category": []
+  },
+  {
+    "name": "Data Engines",
+    "icon": "Builder",
+    "status": true,
+    "role": ["Dev-Admin", "Admin"],
+    "route": "",
+    "category": [
+      {
+        "name": "SEO Metadata",
+        "icon": "Meta",
+        "status": true,
+        "route": "/builder/meta"
+      },
+      {
+        "name": "JSON Config",
+        "icon": "Json",
+        "status": true,
+        "route": "/builder/json"
+      },
+      {
+        "name": "AI Integrations",
+        "icon": "AI",
+        "status": true,
+        "route": "/management/ai"
+      }
+    ]
+  },
+  {
+    "name": "Administration",
+    "icon": "Management",
+    "status": true,
+    "role": ["Dev-Admin", "Admin"],
+    "route": "",
+    "category": [
+      {
+        "name": "System Administrators",
+        "icon": "Users",
+        "status": true,
+        "route": "/users"
+      },
+      {
+        "name": "Clients",
+        "icon": "Customers",
+        "status": true,
+        "route": "/customers"
+      }
+    ]
+  }
+]

@@ -1,0 +1,335 @@
+/* Google Analytics 4 Dashboard - Settings Styles */
+
+.ga4-header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.ga4-title-area {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ga4-badge-verified {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #1a73e8;
+}
+
+.ga4-controls-area {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ga4-control-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: #ffffff;
+  border: 1px solid #dadce0;
+  border-radius: 4px;
+  font-size: 13px;
+  color: #3c4043;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background-color 0.2s;
+}
+
+.ga4-control-btn:hover {
+  background-color: #f8f9fa;
+}
+
+/* Stats Cards Grid - Prevent horizontal stretching with minmax(0, 1fr) */
+.ga4-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.ga4-stat-card {
+  background: #ffffff;
+  border: 1px solid #dadce0;
+  border-radius: 8px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 145px;
+  box-shadow: 0 1px 2px rgba(60,64,67,0.1);
+  font-family: 'Poppins', sans-serif;
+  min-width: 0; /* Allows card to shrink below default content width */
+}
+
+.ga4-stat-label {
+  font-size: 12px;
+  color: #5f6368;
+  font-weight: 500;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.ga4-stat-value {
+  font-size: 22px;
+  color: #202124;
+  font-weight: 600;
+  margin: 4px 0 0 0;
+}
+
+.ga4-stat-comparison {
+  font-size: 11px;
+  color: #5f6368;
+  margin: 2px 0 6px 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ga4-trend-up {
+  color: #137333;
+  font-weight: 600;
+}
+
+.ga4-sparkline-container {
+  height: 40px;
+  margin-top: auto;
+  width: 100%;
+}
+
+/* Middle Layout Grid */
+.ga4-mid-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.8fr) minmax(0, 1.1fr) minmax(0, 1.1fr);
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+/* Bottom Layout Grid */
+.ga4-bottom-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1.3fr) minmax(0, 1.4fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+/* Card General Styling */
+.ga4-dashboard-card {
+  background: #ffffff;
+  border: 1px solid #dadce0;
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 1px 2px rgba(60,64,67,0.1);
+  min-height: 330px;
+  min-width: 0; /* Prevents overflow inside grid columns */
+}
+
+.ga4-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.ga4-card-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #202124;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ga4-card-subtitle {
+  font-size: 11px;
+  color: #5f6368;
+  margin: 2px 0 0 0;
+}
+
+.ga4-card-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #1a73e8;
+  font-size: 12px;
+  font-weight: 500;
+  text-decoration: none;
+  align-self: flex-start;
+  margin-top: auto;
+  padding-top: 12px;
+  cursor: pointer;
+  border: 0;
+  background: transparent;
+}
+
+.ga4-card-link:hover {
+  text-decoration: underline;
+}
+
+/* Donut Chart and Legend layout (Side-by-side horizontal alignment) */
+.ga4-donut-layout {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-grow: 1;
+  width: 100%;
+}
+
+.ga4-donut-chart-box {
+  flex: 1.1;
+  max-width: 140px;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.ga4-donut-legend-box {
+  flex: 1.9;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ga4-donut-legend-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #f1f3f4;
+}
+
+.ga4-legend-color-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+/* Country map and list layout */
+.ga4-country-layout {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-grow: 1;
+}
+
+.ga4-map-container {
+  flex: 1.2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ga4-country-list {
+  flex: 0.8;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ga4-country-item {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #3c4043;
+}
+
+/* Pages table styling */
+.ga4-pages-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.ga4-pages-table th {
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  color: #5f6368;
+  padding: 8px 4px;
+  border-bottom: 1px solid #dadce0;
+}
+
+.ga4-pages-table td {
+  padding: 10px 4px;
+  font-size: 12px;
+  color: #3c4043;
+  border-bottom: 1px solid #f1f3f4;
+}
+
+.ga4-footer {
+  text-align: center;
+  color: #5f6368;
+  font-size: 12px;
+  padding: 24px 0 12px 0;
+  border-top: 1px solid #dadce0;
+  margin-top: 12px;
+}
+
+/* Responsive Utilities (Updated break-point to 1440px to stack columns correctly on average viewports) */
+@media (max-width: 1440px) {
+  .ga4-stats-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .ga4-mid-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .ga4-bottom-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .ga4-stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .ga4-country-layout {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 480px) {
+  .ga4-stats-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .ga4-donut-layout {
+    flex-direction: column;
+    gap: 16px;
+  }
+}
+
+/* Map Geolocation Pulse Animation */
+@keyframes ga4-pulse {
+  0% {
+    r: 4px;
+    opacity: 1;
+  }
+  100% {
+    r: 14px;
+    opacity: 0;
+  }
+}
+
+.ga4-pulse-circle {
+  animation: ga4-pulse 2s infinite;
+  stroke: #1a73e8;
+  stroke-width: 2px;
+  fill: transparent;
+  pointer-events: none;
+}

@@ -15,7 +15,7 @@ const GenericContainer = ({
       case "v2":
         return "container2";
       case "v3":
-        return "px-10 py-10";
+        return "p-8";
       default:
         return "w-full";
     }

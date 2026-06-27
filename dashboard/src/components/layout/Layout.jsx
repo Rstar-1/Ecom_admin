@@ -1,0 +1,32 @@
+import React, { useState } from "react";
+import { Outlet } from "react-router-dom";
+import Sidebar from "./Sidebar";
+import Header from "./Header";
+
+const Layout = () => {
+  const [isCollapsed, setIsCollapsed] = useState(false);
+
+  return (
+    <>
+      <div className="w-full flex">
+        <div
+          className={isCollapsed ? "w-5 bordr" : "w-20 bordr"}
+          style={{ transition: "width 0.25s cubic-bezier(0.4, 0, 0.2, 1)" }}
+        >
+          <Sidebar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
+        </div>
+        <div
+          className={(isCollapsed ? "w-95" : "w-80") + " h-100 overflow-auto"}
+          style={{ transition: "width 0.25s cubic-bezier(0.4, 0, 0.2, 1)" }}
+        >
+          <Header />
+          <div className="">
+            <Outlet />
+          </div>
+        </div>
+      </div>
+    </>
+  );
+};
+
+export default Layout;

@@ -335,7 +335,7 @@ const Dasboard = () => {
                   <h3 className="title-text text-dark font-600">
                     Earning Reports
                   </h3>
-                  <p className="small-text mt-5 text-gray">
+                  <p className="mini-text text-gray">
                     Weekly Earnings Overview
                   </p>
 

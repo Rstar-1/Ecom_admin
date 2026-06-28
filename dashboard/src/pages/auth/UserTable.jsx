@@ -1,49 +1,52 @@
-import React, { useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import GenericTable from "../utility/GenericTable";
+import Table from "../../components/common/Table";
 import { getUsers } from "../../redux/auth/authSlice";
 
 const UserTable = () => {
   const dispatch = useDispatch();
-
   const { users, pagination, loading } = useSelector((state) => state.auth);
+  const [page, setPage] = useState(1);
+  const [searchQuery, setSearchQuery] = useState("");
 
-  // 🔥 fetchData function (used by GenericTable)
-  const fetchData = async ({ search, page }) => {
-    await dispatch(
+  useEffect(() => {
+    dispatch(
       getUsers({
-        search,
+        search: searchQuery,
         page,
-        limit: 10, // match backend
+        limit: 10,
       })
     );
-  };
-
-  // Optional: first load
-  useEffect(() => {
-    fetchData({ search: "", page: 1 });
-  }, []);
+  }, [dispatch, page, searchQuery]);
 
   const columns = [
-    { label: "Name", field: "fullname" },
-    { label: "Email", field: "email" },
-    { label: "Role", field: "role" },
-    { label: "Mobile No", field: "mobileno" },
-    { label: "Created At", field: "createdAt" },
-    { label: "Updated At", field: "updatedAt" },
+    { header: "Name", accessor: "fullname", ui: "text", style: { minWidth: "160px" } },
+    { header: "Email", accessor: "email", ui: "text", style: { minWidth: "180px" } },
+    { header: "Role", accessor: "role", ui: "badge", style: { minWidth: "100px" } },
+    { header: "Mobile No", accessor: "mobileno", ui: "text", style: { minWidth: "130px" } },
+    { header: "Created At", accessor: "createdAt", ui: "text", style: { minWidth: "140px" } },
+    { header: "Updated At", accessor: "updatedAt", ui: "text", style: { minWidth: "140px" } },
   ];
 
   return (
-    <div>
-      <GenericTable
+    <div className="p-16">
+      <Table
         title="Users"
+        headerSub="System User Management"
         columns={columns}
-        fetchData={fetchData}
-        data={users}
-        total={pagination?.total || 0}
-        limit={pagination?.limit || 10}
-        showExport={true}
-        onExport={() => console.log("Export clicked")}
+        data={users || []}
+        totalItems={pagination?.total || 0}
+        itemsPerPage={pagination?.limit || 10}
+        page={page}
+        onPageChange={(p) => setPage(p)}
+        searchQuery={searchQuery}
+        onSearchChange={(q) => {
+          setSearchQuery(q);
+          setPage(1);
+        }}
+        searchPlaceholder="Search users..."
+        showControls={true}
+        loading={loading}
       />
     </div>
   );

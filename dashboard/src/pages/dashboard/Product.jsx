@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Chart from "react-apexcharts";
-import Container from "../../components/common/Container";
 import Button from "../../components/common/Button";
-import Tab from "../../components/common/Tab";
+import Icon from "../../components/common/Icon";
 import Table from "../../components/common/Table";
+import { CrudModal, DeleteModal } from "../../components/common/Modal";
+import Fields from "../../components/common/Fields";
 import Structure from "../../components/layout/Structure";
 import {
   productColumns,
@@ -16,217 +17,7 @@ import {
   initialOrders
 } from "../../data/cmsMockData";
 
-// Color class lookup for categories
-const getCatColorClasses = (colorHex) => {
-  switch (colorHex) {
-    case "#1e74db": return { dot: "text-primary", badge: "bg-light-primary text-primary" };
-    case "#ef4444": return { dot: "text-danger", badge: "bg-light-danger text-danger" };
-    case "#f97316": return { dot: "text-warning", badge: "bg-light-warning text-warning" };
-    case "#22c55e": return { dot: "text-success", badge: "bg-light-success text-success" };
-    case "#0284c7": return { dot: "text-info", badge: "bg-light-primary text-info" };
-    case "#2563eb": return { dot: "text-secondary", badge: "bg-light-secondary text-secondary" };
-    case "#a855f7": return { dot: "text-primary", badge: "bg-light-secondary text-primary" };
-    case "#92400e": return { dot: "text-warning", badge: "bg-light-warning text-warning" };
-    case "#475569": return { dot: "text-gray", badge: "bg-light-primary text-gray" };
-    default: return { dot: "text-primary", badge: "bg-light-primary text-primary" };
-  }
-};
 
-const getProductCategoryClasses = (categoryName, categoriesList) => {
-  const cat = categoriesList.find(c => c.name === categoryName);
-  return getCatColorClasses(cat ? cat.color : "#475569");
-};
-
-const formatProductData = (products, categoriesList) => {
-  return products.map((p) => {
-    let stockClass = "text-success font-600";
-    if (p.stock <= 15) stockClass = "text-warning font-600";
-    if (p.stock === 0) stockClass = "text-danger font-600";
-
-    const displayStatus = (p.status === "Inactive" || p.status === "Out of Stock" || p.status === "Low Stock") ? "Inactive" : "Active";
-    const statusClass = displayStatus === "Active" ? "text-success font-600" : "text-danger font-600";
-    const statusBadge = displayStatus === "Active" ? "bg-light-success px-8 py-4 rounded-5" : "bg-light-danger px-8 py-4 rounded-5";
-
-    const categoryClasses = getProductCategoryClasses(p.category, categoriesList);
-
-    return {
-      id: p.id,
-      checkbox: <input type="checkbox" className="cursor-pointer" />,
-      image: <img src={p.image} alt={p.name} className="common-img rounded-5 object-cover border-tertiary" />,
-      name: (
-        <div className="grid-cols-1" style={{ minWidth: "220px" }}>
-          <span className="headmini-text font-600 text-dark">{p.name}</span>
-          <span className="mini-text text-gray">{p.sub}</span>
-        </div>
-      ),
-      sku: p.sku,
-      category: (
-        <span className={`px-8 py-4 rounded-5 mini-text font-600 ${categoryClasses.badge}`} style={{ whiteSpace: "nowrap" }}>
-          {p.category}
-        </span>
-      ),
-      price: p.price,
-      stock: <span className={stockClass}>{p.stock}</span>,
-      status: <span className={`${statusBadge} ${statusClass}`} style={{ whiteSpace: "nowrap" }}>{displayStatus}</span>,
-      rating: (
-        <div className="flex items-center gap-4 font-500">
-          <span className="text-warning">★</span>
-          <span>{p.rating}</span>
-          <span className="mini-text text-gray">({p.ratingCount})</span>
-        </div>
-      ),
-      sales: p.sales,
-      updated: p.updated,
-      actions: (
-        <Button
-          version="v2"
-          bg="white"
-          color="gray"
-          colorHover="dark"
-          className="p-4"
-        >
-          <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="12" cy="12" r="1"></circle>
-            <circle cx="12" cy="5" r="1"></circle>
-            <circle cx="12" cy="19" r="1"></circle>
-          </svg>
-        </Button>
-      )
-    };
-  });
-};
-
-const formatInventoryData = (inv, categoriesList) => {
-  return inv.map((item) => {
-    let statusClass = "text-success font-600";
-    let statusBadge = "";
-    if (item.status === "Low Stock") {
-      statusClass = "text-warning font-600";
-      statusBadge = "bg-light-warning px-8 py-4 rounded-5";
-    }
-    if (item.status === "Out of Stock") {
-      statusClass = "text-danger font-600";
-      statusBadge = "bg-light-danger px-8 py-4 rounded-5";
-    }
-
-    const categoryClasses = getProductCategoryClasses(item.category, categoriesList);
-
-    return {
-      id: item.id,
-      checkbox: <input type="checkbox" className="cursor-pointer" />,
-      name: <span className="small-text font-600 text-dark" style={{ whiteSpace: "normal", minWidth: "200px" }}>{item.name}</span>,
-      sku: item.sku,
-      category: (
-        <span className={`px-8 py-4 rounded-5 small-text font-600 ${categoryClasses.badge}`} style={{ whiteSpace: "nowrap" }}>
-          {item.category}
-        </span>
-      ),
-      qty: item.qty,
-      reorder: item.reorder,
-      location: item.location,
-      val: item.val,
-      status: <span className={`${statusBadge} ${statusClass}`} style={{ whiteSpace: "nowrap" }}>{item.status}</span>,
-      actions: (
-        <Button
-          version="v2"
-          bg="transparent"
-          color="gray"
-          colorHover="dark"
-          className="p-4"
-        >
-          <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="12" cy="12" r="1"></circle>
-            <circle cx="12" cy="5" r="1"></circle>
-            <circle cx="12" cy="19" r="1"></circle>
-          </svg>
-        </Button>
-      )
-    };
-  });
-};
-
-const formatReviewData = (revs) => {
-  return revs.map((item) => {
-    let statusClass = "text-success font-600";
-    let statusBadge = "";
-    if (item.status === "Pending") {
-      statusClass = "text-warning font-600";
-      statusBadge = "bg-light-warning px-8 py-4 rounded-5";
-    }
-    if (item.status === "Flagged") {
-      statusClass = "text-danger font-600";
-      statusBadge = "bg-light-danger px-8 py-4 rounded-5";
-    }
-
-    return {
-      id: item.id,
-      checkbox: <input type="checkbox" className="cursor-pointer" />,
-      product: <span className="small-text font-600 text-dark" style={{ whiteSpace: "normal", minWidth: "150px" }}>{item.product}</span>,
-      user: item.user,
-      rating: (
-        <div className="flex items-center gap-4 font-500">
-          <span className="text-warning">★</span>
-          <span>{item.rating}</span>
-        </div>
-      ),
-      comment: <span className="text-gray" style={{ whiteSpace: "normal", wordBreak: "break-all", minWidth: "220px" }}>{item.comment}</span>,
-      date: item.date,
-      status: <span className={`${statusBadge} ${statusClass}`}>{item.status}</span>,
-      actions: (
-        <div className="flex gap-4">
-          <Button version="v2" bg="success" color="white" className="px-6 py-2">Approve</Button>
-          <Button version="v2" bg="danger" color="white" className="px-6 py-2">Delete</Button>
-        </div>
-      )
-    };
-  });
-};
-
-const formatOrderData = (orders) => {
-  return orders.map((item) => {
-    let statusClass = "text-success font-600";
-    let statusBadge = "";
-    if (item.status === "Shipped") {
-      statusClass = "text-info font-600";
-      statusBadge = "bg-light-primary px-8 py-4 rounded-5";
-    }
-    if (item.status === "Processing") {
-      statusClass = "text-warning font-600";
-      statusBadge = "bg-light-warning px-8 py-4 rounded-5";
-    }
-    if (item.status === "Cancelled") {
-      statusClass = "text-danger font-600";
-      statusBadge = "bg-light-danger px-8 py-4 rounded-5";
-    }
-
-    return {
-      id: item.id,
-      checkbox: <input type="checkbox" className="cursor-pointer" />,
-      orderId: <span className="small-text font-600 text-primary">{item.orderId}</span>,
-      customer: item.customer,
-      date: item.date,
-      products: item.products,
-      amount: <span className="font-600 text-dark">{item.amount}</span>,
-      payment: item.payment,
-      status: <span className={`${statusBadge} ${statusClass}`}>{item.status}</span>,
-      actions: (
-        <Button
-          version="v2"
-          bg="transparent"
-          color="gray"
-          colorHover="dark"
-          className="p-4"
-        >
-          <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="12" cy="12" r="1"></circle>
-            <circle cx="12" cy="5" r="1"></circle>
-            <circle cx="12" cy="19" r="1"></circle>
-          </svg>
-        </Button>
-      )
-    };
-  });
-};
 
 // Sparkline configuration helper
 const sparklineOptions = (color) => ({
@@ -286,16 +77,75 @@ const SparklineCard = ({ title, value, changeText, isPositive, chartColor, chart
   );
 };
 
+const sparklineCardsData = [
+  {
+    id: "total-products",
+    title: "Total Products",
+    value: "1,248",
+    changeText: "12.5%",
+    isPositive: true,
+    chartColor: "#1e74db",
+    chartData: [1180, 1200, 1195, 1220, 1210, 1235, 1248]
+  },
+  {
+    id: "active-products",
+    title: "Active Products",
+    value: "892",
+    changeText: "8.3%",
+    isPositive: true,
+    chartColor: "#8b5cf6",
+    chartData: [840, 860, 850, 880, 872, 885, 892]
+  },
+  {
+    id: "out-of-stock",
+    title: "Out of Stock",
+    value: "256",
+    changeText: "5.6%",
+    isPositive: true,
+    chartColor: "#ef4444",
+    chartData: [240, 248, 252, 245, 250, 253, 256]
+  },
+  {
+    id: "low-stock",
+    title: "Low Stock",
+    value: "100",
+    changeText: "2.1%",
+    isPositive: false,
+    chartColor: "#f97316",
+    chartData: [110, 105, 108, 104, 102, 101, 100]
+  },
+  {
+    id: "total-revenue",
+    title: "Total Revenue",
+    value: "$78,642",
+    changeText: "15.2%",
+    isPositive: true,
+    chartColor: "#22c55e",
+    chartData: [68000, 71000, 70000, 74000, 75500, 77000, 78642]
+  }
+];
+
 const Product = () => {
   const [selectedCategory, setSelectedCategory] = useState("All Products");
   const [activeTab, setActiveTab] = useState("Product List");
 
+  const [productsList, setProductsList] = useState(initialProducts);
+  const [inventoryList, setInventoryList] = useState(initialInventory);
+  const [reviewsList, setReviewsList] = useState(initialReviews);
+  const [ordersList, setOrdersList] = useState(initialOrders);
+
   const [tableData, setTableData] = useState([]);
   const [tableTotal, setTableTotal] = useState(0);
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState(null);
+
   const [filterTrigger, setFilterTrigger] = useState(0);
 
-  // Unified filter states
   const [filterName, setFilterName] = useState("");
   const [filterSku, setFilterSku] = useState("");
   const [filterCat, setFilterCat] = useState("All");
@@ -318,61 +168,228 @@ const Product = () => {
     setFilterUser("");
     setFilterRating("All");
     setFilterPayment("All");
+    setCurrentPage(1);
     setFilterTrigger(prev => prev + 1);
+  };
+
+  const handleDeleteClick = (item) => {
+    setItemToDelete(item);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!itemToDelete) return;
+    if (activeTab === "Product List") {
+      setProductsList(prev => prev.filter(p => p.id !== itemToDelete.id));
+    } else if (activeTab === "Inventory") {
+      setInventoryList(prev => prev.filter(p => p.id !== itemToDelete.id));
+    } else if (activeTab === "Reviews") {
+      setReviewsList(prev => prev.filter(p => p.id !== itemToDelete.id));
+    } else if (activeTab === "Orders") {
+      setOrdersList(prev => prev.filter(p => p.id !== itemToDelete.id));
+    }
+    setIsDeleteModalOpen(false);
+    setItemToDelete(null);
+  };
+
+  const handleAddSubmit = (formData) => {
+    if (activeTab === "Product List") {
+      const newProd = {
+        id: Date.now(),
+        image: formData.image || "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=100&auto=format&fit=crop&q=60",
+        name: formData.name || "New Product",
+        sub: formData.sub || "",
+        sku: formData.sku || `PROD-${Math.floor(100 + Math.random() * 900)}`,
+        category: formData.category || "Electronics",
+        price: formData.price ? (formData.price.startsWith("$") ? formData.price : `$${formData.price}`) : "$99.99",
+        stock: formData.stock ? parseInt(formData.stock, 10) : 10,
+        status: formData.status || "Active",
+        rating: formData.rating ? parseFloat(formData.rating) : 5.0,
+        ratingCount: 1,
+        sales: formData.sales || "0 sales",
+        updated: formData.updated || "Just now"
+      };
+      setProductsList(prev => [newProd, ...prev]);
+    } else if (activeTab === "Inventory") {
+      const newItem = {
+        id: Date.now(),
+        name: formData.name || "New Inventory Item",
+        category: formData.category || "Electronics",
+        qty: formData.qty ? parseInt(formData.qty, 10) : 50,
+        location: formData.location || "Warehouse A",
+        val: formData.val ? (formData.val.startsWith("$") ? formData.val : `$${formData.val}`) : "$500.00",
+        status: formData.status || "In Stock"
+      };
+      setInventoryList(prev => [newItem, ...prev]);
+    } else if (activeTab === "Reviews") {
+      const newRev = {
+        id: Date.now(),
+        product: formData.product || "Product",
+        user: formData.user || "Anonymous",
+        rating: formData.rating ? parseFloat(formData.rating) : 5.0,
+        comment: formData.comment || "Excellent!",
+        date: formData.date || "Just now",
+        status: formData.status || "Pending"
+      };
+      setReviewsList(prev => [newRev, ...prev]);
+    } else if (activeTab === "Orders") {
+      const newOrd = {
+        id: Date.now(),
+        orderId: formData.orderId || `#ORD-${Math.floor(1000 + Math.random() * 9000)}`,
+        customer: formData.customer || "Customer",
+        date: formData.date || "Just now",
+        products: formData.products || "1 item",
+        amount: formData.amount ? (formData.amount.startsWith("$") ? formData.amount : `$${formData.amount}`) : "$99.00",
+        payment: formData.payment || "Paid",
+        status: formData.status || "Processing"
+      };
+      setOrdersList(prev => [newOrd, ...prev]);
+    }
+    setIsAddModalOpen(false);
   };
 
   // Mock category options
   const categoriesList = [
-    { name: "All Products", count: initialProducts.length, color: "#1e74db", hasFilterBadge: true },
-    { name: "Electronics", count: initialProducts.filter(p => p.category === "Electronics").length, color: "#ef4444" },
-    { name: "Fashion", count: initialProducts.filter(p => p.category === "Fashion").length, color: "#f97316" },
-    { name: "Home & Kitchen", count: initialProducts.filter(p => p.category === "Home & Kitchen").length, color: "#22c55e" },
-    { name: "Beauty & Personal Care", count: initialProducts.filter(p => p.category === "Beauty & Personal Care").length, color: "#0284c7" },
-    { name: "Sports & Outdoors", count: initialProducts.filter(p => p.category === "Sports & Outdoors").length, color: "#2563eb" },
-    { name: "Toys & Games", count: initialProducts.filter(p => p.category === "Toys & Games").length, color: "#a855f7" },
-    { name: "Books & Stationery", count: initialProducts.filter(p => p.category === "Books & Stationery").length, color: "#92400e" },
-    { name: "Automotive", count: initialProducts.filter(p => p.category === "Automotive").length, color: "#475569" },
+    { name: "All Products", count: productsList.length, color: "#1e74db", hasFilterBadge: true },
+    { name: "Electronics", count: productsList.filter(p => p.category === "Electronics").length, color: "#ef4444" },
+    { name: "Fashion", count: productsList.filter(p => p.category === "Fashion").length, color: "#f97316" },
+    { name: "Home & Kitchen", count: productsList.filter(p => p.category === "Home & Kitchen").length, color: "#22c55e" },
+    { name: "Beauty & Personal Care", count: productsList.filter(p => p.category === "Beauty & Personal Care").length, color: "#0284c7" },
+    { name: "Sports & Outdoors", count: productsList.filter(p => p.category === "Sports & Outdoors").length, color: "#2563eb" },
+    { name: "Toys & Games", count: productsList.filter(p => p.category === "Toys & Games").length, color: "#a855f7" },
+    { name: "Books & Stationery", count: productsList.filter(p => p.category === "Books & Stationery").length, color: "#92400e" },
+    { name: "Automotive", count: productsList.filter(p => p.category === "Automotive").length, color: "#475569" },
   ];
 
-  // Get columns list based on the active tab
-  const getTableColumns = () => {
+  const getModalTitle = () => {
     switch (activeTab) {
-      case "Product List": return productColumns;
-      case "Inventory": return inventoryColumns;
-      case "Reviews": return reviewColumns;
-      case "Orders": return orderColumns;
-      default: return productColumns;
+      case "Product List":
+        return "Add New Product";
+      case "Inventory":
+        return "Add Inventory Item";
+      case "Reviews":
+        return "Add New Review";
+      case "Orders":
+        return "Add New Order";
+      default:
+        return "Add Item";
     }
   };
 
-  // Dynamic data fetching logic used by Table component
-  const handleFetchData = async ({ search, page }) => {
+  const getModalFields = () => {
+    switch (activeTab) {
+      case "Product List":
+        return [
+          { name: "image", label: "Image URL", type: "dragfile", placeholder: "https://images.unsplash.com/..." },
+          { name: "name", label: "Product Name", type: "text", required: true, placeholder: "e.g. Wireless Headphones" },
+          { name: "category", label: "Category", type: "select", options: categoriesList.filter(c => c.name !== "All Products").map(c => ({ label: c.name, value: c.name })) },
+          { name: "price", label: "Price ($)", type: "text", placeholder: "99.99" },
+          { name: "stock", label: "Initial Stock", type: "number", placeholder: "50" },
+          { name: "status", label: "Status", type: "select", options: [{ label: "Active", value: "Active" }, { label: "Inactive", value: "Inactive" }] }
+        ];
+      case "Inventory":
+        return [
+          { name: "name", label: "Product Name", type: "text", required: true, placeholder: "e.g. Wireless Headphones" },
+          { name: "category", label: "Category", type: "select", options: categoriesList.filter(c => c.name !== "All Products").map(c => ({ label: c.name, value: c.name })) },
+          { name: "qty", label: "Stock Quantity", type: "number", placeholder: "100" },
+          { name: "location", label: "Location", type: "text", placeholder: "Warehouse A" },
+          { name: "val", label: "Value ($)", type: "text", placeholder: "1,500.00" },
+          { name: "status", label: "Status", type: "select", options: [{ label: "In Stock", value: "In Stock" }, { label: "Low Stock", value: "Low Stock" }, { label: "Out of Stock", value: "Out of Stock" }] }
+        ];
+      case "Reviews":
+        return [
+          { name: "product", label: "Product", type: "text", required: true, placeholder: "e.g. iPhone 15 Pro" },
+          { name: "user", label: "User", type: "text", required: true, placeholder: "John Doe" },
+          { name: "rating", label: "Rating", type: "number", placeholder: "5" },
+          { name: "comment", label: "Comment", type: "text", placeholder: "Great product!" },
+          { name: "date", label: "Date", type: "text", placeholder: "Today" },
+          { name: "status", label: "Status", type: "select", options: [{ label: "Approved", value: "Approved" }, { label: "Pending", value: "Pending" }] }
+        ];
+      case "Orders":
+        return [
+          { name: "orderId", label: "Order ID", type: "text", required: true, placeholder: "#ORD-9999" },
+          { name: "customer", label: "Customer", type: "text", required: true, placeholder: "Jane Smith" },
+          { name: "products", label: "Products", type: "text", placeholder: "2 items" },
+          { name: "amount", label: "Amount ($)", type: "text", placeholder: "199.99" },
+          { name: "payment", label: "Payment", type: "select", options: [{ label: "Paid", value: "Paid" }, { label: "Pending", value: "Pending" }, { label: "Failed", value: "Failed" }] },
+          { name: "status", label: "Status", type: "select", options: [{ label: "Delivered", value: "Delivered" }, { label: "Processing", value: "Processing" }, { label: "Shipped", value: "Shipped" }, { label: "Cancelled", value: "Cancelled" }] }
+        ];
+      default:
+        return [];
+    }
+  };
+
+  const getTableColumns = () => {
+    let cols = productColumns;
+    if (activeTab === "Inventory") cols = inventoryColumns;
+    if (activeTab === "Reviews") cols = reviewColumns;
+    if (activeTab === "Orders") cols = orderColumns;
+
+    return cols.map((col) => {
+      if (col.accessor === "checkbox") {
+        return {
+          ...col,
+          render: () => <input type="checkbox" className="cursor-pointer" />
+        };
+      }
+
+
+      if (col.accessor === "actions") {
+        return {
+          ...col,
+          render: (item) => activeTab === "Reviews" ? (
+            <div className="flex gap-4">
+              <Button version="v2" bg="success" color="white" className="px-6 py-2">Approve</Button>
+              <Button version="v2" bg="danger" color="white" className="px-6 py-2" onClick={() => handleDeleteClick(item)}>Delete</Button>
+            </div>
+          ) : (
+            <Button
+              version="v2"
+              bg="white"
+              color="gray"
+              colorHover="dark"
+              className="p-4"
+              onClick={() => handleDeleteClick(item)}
+            >
+              <Icon name="MoreVertical" width="16" height="16" strokeWidth="2.5" />
+            </Button>
+          )
+        };
+      }
+      return col;
+    });
+  };
+
+  const getHeaderSub = () => {
+    switch (activeTab) {
+      case "Product List":
+        return `${productsList.length} products • ${new Set(productsList.map(p => p.category)).size} categories • ${productsList.filter(p => p.status === "Active").length} active • ${productsList.filter(p => p.stock === 0).length} out of stock`;
+      case "Inventory":
+        return `${inventoryList.length} items • ${inventoryList.filter(i => i.status === "In Stock").length} in stock • ${inventoryList.filter(i => i.status === "Low Stock").length} low stock • ${inventoryList.filter(i => i.status === "Out of Stock").length} out of stock`;
+      case "Reviews":
+        return `${reviewsList.length} reviews • ${reviewsList.filter(r => r.status === "Approved").length} approved • ${reviewsList.filter(r => r.status === "Pending").length} pending`;
+      case "Orders":
+        return `${ordersList.length} orders • ${ordersList.filter(o => o.status === "Delivered").length} delivered • ${ordersList.filter(o => o.status === "Processing").length} processing`;
+      default:
+        return "";
+    }
+  };
+
+  useEffect(() => {
     if (activeTab === "Analytic") {
       setTableData([]);
       setTableTotal(0);
       return;
     }
     let rawData = [];
-    let formatter = (x) => x;
 
     if (activeTab === "Product List") {
       rawData = selectedCategory === "All Products"
-        ? initialProducts
-        : initialProducts.filter(p => p.category === selectedCategory);
+        ? productsList
+        : productsList.filter(p => p.category === selectedCategory);
 
-      // Apply filter inputs
-      if (filterName) {
-        rawData = rawData.filter(p => p.name.toLowerCase().includes(filterName.toLowerCase()));
-      }
-      if (filterSku) {
-        rawData = rawData.filter(p => p.sku.toLowerCase().includes(filterSku.toLowerCase()));
-      }
-      if (filterCat !== "All") {
-        rawData = rawData.filter(p => p.category === filterCat);
-      }
-      if (filterStatus !== "All") {
-        rawData = rawData.filter(p => p.status === filterStatus);
-      }
+      if (filterName) rawData = rawData.filter(p => p.name.toLowerCase().includes(filterName.toLowerCase()));
+      if (filterStatus !== "All") rawData = rawData.filter(p => p.status === filterStatus);
       if (filterMinPrice) {
         rawData = rawData.filter(p => {
           const val = parseFloat(p.price.replace(/[^0-9.]/g, ""));
@@ -385,71 +402,32 @@ const Product = () => {
           return !isNaN(val) && val <= parseFloat(filterMaxPrice);
         });
       }
-
-      formatter = (items) => formatProductData(items, categoriesList);
     } else if (activeTab === "Inventory") {
       rawData = selectedCategory === "All Products"
-        ? initialInventory
-        : initialInventory.filter(p => p.category === selectedCategory);
+        ? inventoryList
+        : inventoryList.filter(p => p.category === selectedCategory);
 
-      // Apply filter inputs
-      if (filterName) {
-        rawData = rawData.filter(p => p.name.toLowerCase().includes(filterName.toLowerCase()));
-      }
-      if (filterSku) {
-        rawData = rawData.filter(p => p.sku.toLowerCase().includes(filterSku.toLowerCase()));
-      }
-      if (filterCat !== "All") {
-        rawData = rawData.filter(p => p.category === filterCat);
-      }
-      if (filterLocation) {
-        rawData = rawData.filter(p => p.location.toLowerCase().includes(filterLocation.toLowerCase()));
-      }
-      if (filterStatus !== "All") {
-        rawData = rawData.filter(p => p.status === filterStatus);
-      }
-
-      formatter = (items) => formatInventoryData(items, categoriesList);
+      if (filterName) rawData = rawData.filter(p => p.name.toLowerCase().includes(filterName.toLowerCase()));
+      if (filterLocation) rawData = rawData.filter(p => p.location.toLowerCase().includes(filterLocation.toLowerCase()));
+      if (filterStatus !== "All") rawData = rawData.filter(p => p.status === filterStatus);
     } else if (activeTab === "Reviews") {
-      rawData = initialReviews;
+      rawData = reviewsList;
 
-      // Apply filter inputs
-      if (filterName) {
-        rawData = rawData.filter(p => p.product.toLowerCase().includes(filterName.toLowerCase()));
-      }
-      if (filterUser) {
-        rawData = rawData.filter(p => p.user.toLowerCase().includes(filterUser.toLowerCase()));
-      }
-      if (filterRating !== "All") {
-        rawData = rawData.filter(p => p.rating === parseInt(filterRating, 10));
-      }
-      if (filterStatus !== "All") {
-        rawData = rawData.filter(p => p.status === filterStatus);
-      }
-
-      formatter = formatReviewData;
+      if (filterName) rawData = rawData.filter(p => p.product.toLowerCase().includes(filterName.toLowerCase()));
+      if (filterUser) rawData = rawData.filter(p => p.user.toLowerCase().includes(filterUser.toLowerCase()));
+      if (filterRating !== "All") rawData = rawData.filter(p => p.rating === parseInt(filterRating, 10));
+      if (filterStatus !== "All") rawData = rawData.filter(p => p.status === filterStatus);
     } else if (activeTab === "Orders") {
-      rawData = initialOrders;
+      rawData = ordersList;
 
-      // Apply filter inputs
-      if (filterName) {
-        rawData = rawData.filter(p => p.orderId.toLowerCase().includes(filterName.toLowerCase()));
-      }
-      if (filterUser) {
-        rawData = rawData.filter(p => p.customer.toLowerCase().includes(filterUser.toLowerCase()));
-      }
-      if (filterPayment !== "All") {
-        rawData = rawData.filter(p => p.payment === filterPayment);
-      }
-      if (filterStatus !== "All") {
-        rawData = rawData.filter(p => p.status === filterStatus);
-      }
-
-      formatter = formatOrderData;
+      if (filterName) rawData = rawData.filter(p => p.orderId.toLowerCase().includes(filterName.toLowerCase()));
+      if (filterUser) rawData = rawData.filter(p => p.customer.toLowerCase().includes(filterUser.toLowerCase()));
+      if (filterPayment !== "All") rawData = rawData.filter(p => p.payment === filterPayment);
+      if (filterStatus !== "All") rawData = rawData.filter(p => p.status === filterStatus);
     }
 
-    if (search) {
-      const q = search.toLowerCase();
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
       rawData = rawData.filter(item => {
         const nameMatch = item.name?.toLowerCase().includes(q) || false;
         const customerMatch = item.customer?.toLowerCase().includes(q) || false;
@@ -460,15 +438,13 @@ const Product = () => {
       });
     }
 
-    const limit = 20;
-    const startIndex = (page - 1) * limit;
+    const limit = 10;
+    const startIndex = (currentPage - 1) * limit;
     const paginatedData = rawData.slice(startIndex, startIndex + limit);
 
-    setTableData(formatter(paginatedData));
+    setTableData(paginatedData);
     setTableTotal(rawData.length);
-  };
-
-
+  }, [activeTab, selectedCategory, currentPage, searchQuery, filterName, filterSku, filterCat, filterStatus, filterMinPrice, filterMaxPrice, filterLocation, filterUser, filterRating, filterPayment, productsList, inventoryList, reviewsList, ordersList, filterTrigger]);
 
   const getFilterDescription = () => {
     const activeFilters = [];
@@ -477,15 +453,11 @@ const Product = () => {
     }
     if (activeTab === "Product List") {
       if (filterName) activeFilters.push(`Name: "${filterName}"`);
-      if (filterSku) activeFilters.push(`SKU: "${filterSku}"`);
-      if (filterCat !== "All") activeFilters.push(`Category: ${filterCat}`);
       if (filterStatus !== "All") activeFilters.push(`Status: ${filterStatus}`);
       if (filterMinPrice) activeFilters.push(`Min Price: $${filterMinPrice}`);
       if (filterMaxPrice) activeFilters.push(`Max Price: $${filterMaxPrice}`);
     } else if (activeTab === "Inventory") {
       if (filterName) activeFilters.push(`Name: "${filterName}"`);
-      if (filterSku) activeFilters.push(`SKU: "${filterSku}"`);
-      if (filterCat !== "All") activeFilters.push(`Category: ${filterCat}`);
       if (filterLocation) activeFilters.push(`Location: "${filterLocation}"`);
       if (filterStatus !== "All") activeFilters.push(`Status: ${filterStatus}`);
     } else if (activeTab === "Reviews") {
@@ -511,238 +483,159 @@ const Product = () => {
       case "Product List":
         return (
           <div className="grid-cols-4 gap-12 w-full">
-            <div>
-              <p className="mini-text text-gray font-600 mb-4 uppercase">Product Name</p>
-              <input
-                type="text"
-                className="h-input border-ec"
-                placeholder="Search name..."
-                value={filterName}
-                onChange={(e) => setFilterName(e.target.value)}
-              />
-            </div>
-            <div>
-              <p className="mini-text text-gray font-600 mb-4 uppercase">SKU</p>
-              <input
-                type="text"
-                className="h-input border-ec"
-                placeholder="Search SKU..."
-                value={filterSku}
-                onChange={(e) => setFilterSku(e.target.value)}
-              />
-            </div>
-            <div>
-              <p className="mini-text text-gray font-600 mb-4 uppercase">Category</p>
-              <select
-                className="h-input border-ec cursor-pointer"
-                value={filterCat}
-                onChange={(e) => setFilterCat(e.target.value)}
-              >
-                <option value="All">All Categories</option>
-                {categoriesList.filter(c => c.name !== "All Products").map((c, i) => (
-                  <option key={i} value={c.name}>{c.name}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <p className="mini-text text-gray font-600 mb-4 uppercase">Status</p>
-              <select
-                className="h-input border-ec cursor-pointer"
-                value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value)}
-              >
-                <option value="All">All Statuses</option>
-                <option value="Active">Active</option>
-                <option value="Inactive">Inactive</option>
-              </select>
-            </div>
-            <div>
-              <p className="mini-text text-gray font-600 mb-4 uppercase">Min Price ($)</p>
-              <input
-                type="number"
-                className="h-input border-ec"
-                placeholder="e.g. 50"
-                value={filterMinPrice}
-                onChange={(e) => setFilterMinPrice(e.target.value)}
-              />
-            </div>
-            <div>
-              <p className="mini-text text-gray font-600 mb-4 uppercase">Max Price ($)</p>
-              <input
-                type="number"
-                className="h-input border-ec"
-                placeholder="e.g. 1000"
-                value={filterMaxPrice}
-                onChange={(e) => setFilterMaxPrice(e.target.value)}
-              />
-            </div>
+            <Fields
+              label="PRODUCT NAME"
+              type="input"
+              placeholder="Search name..."
+              value={filterName}
+              onChange={(val) => { setFilterName(val); setCurrentPage(1); }}
+            />
+            <Fields
+              label="STATUS"
+              type="select"
+              value={filterStatus}
+              onChange={(val) => { setFilterStatus(val); setCurrentPage(1); }}
+              options={[
+                { label: "All Statuses", value: "All" },
+                { label: "Active", value: "Active" },
+                { label: "Inactive", value: "Inactive" }
+              ]}
+            />
+            <Fields
+              label="MIN PRICE ($)"
+              type="number"
+              placeholder="e.g. 50"
+              value={filterMinPrice}
+              onChange={(val) => { setFilterMinPrice(val); setCurrentPage(1); }}
+            />
+            <Fields
+              label="MAX PRICE ($)"
+              type="number"
+              placeholder="e.g. 1000"
+              value={filterMaxPrice}
+              onChange={(val) => { setFilterMaxPrice(val); setCurrentPage(1); }}
+            />
           </div>
         );
       case "Inventory":
         return (
           <div className="grid-cols-4 gap-12 w-full">
-            <div>
-              <p className="mini-text text-gray font-600 mb-4 uppercase">Product Name</p>
-              <input
-                type="text"
-                className="h-input border-ec"
-                placeholder="Search name..."
-                value={filterName}
-                onChange={(e) => setFilterName(e.target.value)}
-              />
-            </div>
-            <div>
-              <p className="mini-text text-gray font-600 mb-4 uppercase">SKU</p>
-              <input
-                type="text"
-                className="h-input border-ec"
-                placeholder="Search SKU..."
-                value={filterSku}
-                onChange={(e) => setFilterSku(e.target.value)}
-              />
-            </div>
-            <div>
-              <p className="mini-text text-gray font-600 mb-4 uppercase">Category</p>
-              <select
-                className="h-input border-ec cursor-pointer"
-                value={filterCat}
-                onChange={(e) => setFilterCat(e.target.value)}
-              >
-                <option value="All">All Categories</option>
-                {categoriesList.filter(c => c.name !== "All Products").map((c, i) => (
-                  <option key={i} value={c.name}>{c.name}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <p className="mini-text text-gray font-600 mb-4 uppercase">Location</p>
-              <input
-                type="text"
-                className="h-input border-ec"
-                placeholder="e.g. Aisle A-3"
-                value={filterLocation}
-                onChange={(e) => setFilterLocation(e.target.value)}
-              />
-            </div>
-            <div>
-              <p className="mini-text text-gray font-600 mb-4 uppercase">Status</p>
-              <select
-                className="h-input border-ec cursor-pointer"
-                value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value)}
-              >
-                <option value="All">All Statuses</option>
-                <option value="In Stock">In Stock</option>
-                <option value="Low Stock">Low Stock</option>
-                <option value="Out of Stock">Out of Stock</option>
-              </select>
-            </div>
+            <Fields
+              label="PRODUCT NAME"
+              type="input"
+              placeholder="Search name..."
+              value={filterName}
+              onChange={(val) => { setFilterName(val); setCurrentPage(1); }}
+            />
+            <Fields
+              label="LOCATION"
+              type="input"
+              placeholder="e.g. Aisle A-3"
+              value={filterLocation}
+              onChange={(val) => { setFilterLocation(val); setCurrentPage(1); }}
+            />
+            <Fields
+              label="STATUS"
+              type="select"
+              value={filterStatus}
+              onChange={(val) => { setFilterStatus(val); setCurrentPage(1); }}
+              options={[
+                { label: "All Statuses", value: "All" },
+                { label: "In Stock", value: "In Stock" },
+                { label: "Low Stock", value: "Low Stock" },
+                { label: "Out of Stock", value: "Out of Stock" }
+              ]}
+            />
           </div>
         );
       case "Reviews":
         return (
           <div className="grid-cols-4 gap-12 w-full">
-            <div>
-              <p className="mini-text text-gray font-600 mb-4 uppercase">Product</p>
-              <input
-                type="text"
-                className="h-input border-ec"
-                placeholder="Search product..."
-                value={filterName}
-                onChange={(e) => setFilterName(e.target.value)}
-              />
-            </div>
-            <div>
-              <p className="mini-text text-gray font-600 mb-4 uppercase">User</p>
-              <input
-                type="text"
-                className="h-input border-ec"
-                placeholder="Search user..."
-                value={filterUser}
-                onChange={(e) => setFilterUser(e.target.value)}
-              />
-            </div>
-            <div>
-              <p className="mini-text text-gray font-600 mb-4 uppercase">Rating</p>
-              <select
-                className="h-input border-ec cursor-pointer"
-                value={filterRating}
-                onChange={(e) => setFilterRating(e.target.value)}
-              >
-                <option value="All">All Ratings</option>
-                <option value="5">5 Stars</option>
-                <option value="4">4 Stars</option>
-                <option value="3">3 Stars</option>
-                <option value="2">2 Stars</option>
-                <option value="1">1 Star</option>
-              </select>
-            </div>
-            <div>
-              <p className="mini-text text-gray font-600 mb-4 uppercase">Status</p>
-              <select
-                className="h-input border-ec cursor-pointer"
-                value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value)}
-              >
-                <option value="All">All Statuses</option>
-                <option value="Approved">Approved</option>
-                <option value="Pending">Pending</option>
-                <option value="Flagged">Flagged</option>
-              </select>
-            </div>
+            <Fields
+              label="PRODUCT"
+              type="input"
+              placeholder="Search product..."
+              value={filterName}
+              onChange={(val) => { setFilterName(val); setCurrentPage(1); }}
+            />
+            <Fields
+              label="USER"
+              type="input"
+              placeholder="Search user..."
+              value={filterUser}
+              onChange={(val) => { setFilterUser(val); setCurrentPage(1); }}
+            />
+            <Fields
+              label="RATING"
+              type="select"
+              value={filterRating}
+              onChange={(val) => { setFilterRating(val); setCurrentPage(1); }}
+              options={[
+                { label: "All Ratings", value: "All" },
+                { label: "5 Stars", value: "5" },
+                { label: "4 Stars", value: "4" },
+                { label: "3 Stars", value: "3" },
+                { label: "2 Stars", value: "2" },
+                { label: "1 Star", value: "1" }
+              ]}
+            />
+            <Fields
+              label="STATUS"
+              type="select"
+              value={filterStatus}
+              onChange={(val) => { setFilterStatus(val); setCurrentPage(1); }}
+              options={[
+                { label: "All Statuses", value: "All" },
+                { label: "Approved", value: "Approved" },
+                { label: "Pending", value: "Pending" },
+                { label: "Flagged", value: "Flagged" }
+              ]}
+            />
           </div>
         );
       case "Orders":
         return (
           <div className="grid-cols-4 gap-12 w-full">
-            <div>
-              <p className="mini-text text-gray font-600 mb-4 uppercase">Order ID</p>
-              <input
-                type="text"
-                className="h-input border-ec"
-                placeholder="Search Order ID..."
-                value={filterName}
-                onChange={(e) => setFilterName(e.target.value)}
-              />
-            </div>
-            <div>
-              <p className="mini-text text-gray font-600 mb-4 uppercase">Customer</p>
-              <input
-                type="text"
-                className="h-input border-ec"
-                placeholder="Search customer..."
-                value={filterUser}
-                onChange={(e) => setFilterUser(e.target.value)}
-              />
-            </div>
-            <div>
-              <p className="mini-text text-gray font-600 mb-4 uppercase">Payment Method</p>
-              <select
-                className="h-input border-ec cursor-pointer"
-                value={filterPayment}
-                onChange={(e) => setFilterPayment(e.target.value)}
-              >
-                <option value="All">All Payments</option>
-                <option value="Credit Card">Credit Card</option>
-                <option value="PayPal">PayPal</option>
-                <option value="Apple Pay">Apple Pay</option>
-                <option value="Google Pay">Google Pay</option>
-              </select>
-            </div>
-            <div>
-              <p className="mini-text text-gray font-600 mb-4 uppercase">Status</p>
-              <select
-                className="h-input border-ec cursor-pointer"
-                value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value)}
-              >
-                <option value="All">All Statuses</option>
-                <option value="Delivered">Delivered</option>
-                <option value="Shipped">Shipped</option>
-                <option value="Processing">Processing</option>
-                <option value="Cancelled">Cancelled</option>
-              </select>
-            </div>
+            <Fields
+              label="ORDER ID"
+              type="input"
+              placeholder="Search Order ID..."
+              value={filterName}
+              onChange={(val) => { setFilterName(val); setCurrentPage(1); }}
+            />
+            <Fields
+              label="CUSTOMER"
+              type="input"
+              placeholder="Search customer..."
+              value={filterUser}
+              onChange={(val) => { setFilterUser(val); setCurrentPage(1); }}
+            />
+            <Fields
+              label="PAYMENT METHOD"
+              type="select"
+              value={filterPayment}
+              onChange={(val) => { setFilterPayment(val); setCurrentPage(1); }}
+              options={[
+                { label: "All Payments", value: "All" },
+                { label: "Credit Card", value: "Credit Card" },
+                { label: "PayPal", value: "PayPal" },
+                { label: "Apple Pay", value: "Apple Pay" },
+                { label: "Google Pay", value: "Google Pay" }
+              ]}
+            />
+            <Fields
+              label="STATUS"
+              type="select"
+              value={filterStatus}
+              onChange={(val) => { setFilterStatus(val); setCurrentPage(1); }}
+              options={[
+                { label: "All Statuses", value: "All" },
+                { label: "Delivered", value: "Delivered" },
+                { label: "Shipped", value: "Shipped" },
+                { label: "Processing", value: "Processing" },
+                { label: "Cancelled", value: "Cancelled" }
+              ]}
+            />
           </div>
         );
       default:
@@ -750,88 +643,51 @@ const Product = () => {
     }
   };
 
-
   return (
     <Structure
       sidebarTitle="Product Categories"
       sidebarItems={categoriesList}
       selectedSidebarItem={selectedCategory}
-      onSidebarItemClick={(name) => setSelectedCategory(name)}
-      headerIcon={
-        <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" className="flex">
-          <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
-          <line x1="3" y1="6" x2="21" y2="6"></line>
-          <path d="M16 10a4 4 0 0 1-8 0"></path>
-        </svg>
-      }
+      onSidebarItemClick={(name) => { setSelectedCategory(name); setCurrentPage(1); }}
+      headerIcon={<Icon name="Orders" width="22" height="22" strokeWidth="2" />}
       headerTitle="Products Overview"
-      headerSub={`${initialProducts.length} products • ${new Set(initialProducts.map(p => p.category)).size} categories • ${initialProducts.filter(p => p.status === "Active").length} active • ${initialProducts.filter(p => p.stock === 0).length} out of stock`}
+      headerSub={getHeaderSub()}
       quickAction={
-        <div className="text-right">
-          <p className="mini-text text-gray font-600 uppercase mb-2">QUICK ACTION</p>
-          <p className="small-text font-600 text-primary flex items-center gap-2 decoration-none cursor-pointer" onClick={(e) => e.preventDefault()}>
-            Add New Product
-            <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round" className="flex">
-              <polyline points="9 18 15 12 9 6"></polyline>
-            </svg>
-          </p>
-        </div>
+        activeTab !== "Analytic" ? (
+          <div className="text-right">
+            <p className="mini-text text-gray font-600 uppercase mb-2">QUICK ACTION</p>
+            <p className="small-text font-600 text-primary flex items-center gap-2 decoration-none cursor-pointer" onClick={() => setIsAddModalOpen(true)}>
+              {getModalTitle()}
+              <Icon name="ChevronRight" width="14" height="14" strokeWidth="2.5" />
+            </p>
+          </div>
+        ) : null
       }
       tabs={[
         {
           name: "Product List",
-          count: initialProducts.length,
-          icon: (
-            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round" className="flex">
-              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-              <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
-              <line x1="12" y1="22.08" x2="12" y2="12"></line>
-            </svg>
-          )
+          count: productsList.length,
+          icon: <Icon name="Product List" width="16" height="16" strokeWidth="2.5" />
         },
         {
           name: "Inventory",
-          count: initialInventory.length,
-          icon: (
-            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round" className="flex">
-              <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
-              <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
-              <line x1="9" y1="9" x2="15" y2="9"></line>
-              <line x1="9" y1="13" x2="15" y2="13"></line>
-              <line x1="9" y1="17" x2="15" y2="17"></line>
-            </svg>
-          )
+          count: inventoryList.length,
+          icon: <Icon name="Inventory" width="16" height="16" strokeWidth="2.5" />
         },
         {
           name: "Reviews",
-          count: initialReviews.length,
-          icon: (
-            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round" className="flex">
-              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-            </svg>
-          )
+          count: reviewsList.length,
+          icon: <Icon name="Reviews" width="16" height="16" strokeWidth="2.5" />
         },
         {
           name: "Orders",
-          count: initialOrders.length,
-          icon: (
-            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round" className="flex">
-              <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
-              <line x1="3" y1="6" x2="21" y2="6"></line>
-              <path d="M16 10a4 4 0 0 1-8 0"></path>
-            </svg>
-          )
+          count: ordersList.length,
+          icon: <Icon name="Orders" width="16" height="16" strokeWidth="2.5" />
         },
         {
           name: "Analytic",
           count: null,
-          icon: (
-            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round" className="flex">
-              <line x1="18" y1="20" x2="18" y2="10"></line>
-              <line x1="12" y1="20" x2="12" y2="4"></line>
-              <line x1="6" y1="20" x2="6" y2="14"></line>
-            </svg>
-          )
+          icon: <Icon name="Analytic" width="16" height="16" strokeWidth="2.5" />
         }
       ]}
       activeTab={activeTab}
@@ -859,50 +715,20 @@ const Product = () => {
       }}
       filterInputs={renderFilterInputs()}
     >
-      {/* Sparkline cards */}
       {activeTab === "Analytic" && (
         <>
           <div className="grid-cols-5 gap-12">
-            <SparklineCard
-              title="Total Products"
-              value="1,248"
-              changeText="12.5%"
-              isPositive={true}
-              chartColor="#1e74db"
-              chartData={[1180, 1200, 1195, 1220, 1210, 1235, 1248]}
-            />
-            <SparklineCard
-              title="Active Products"
-              value="892"
-              changeText="8.3%"
-              isPositive={true}
-              chartColor="#8b5cf6"
-              chartData={[840, 860, 850, 880, 872, 885, 892]}
-            />
-            <SparklineCard
-              title="Out of Stock"
-              value="256"
-              changeText="5.6%"
-              isPositive={true}
-              chartColor="#ef4444"
-              chartData={[240, 248, 252, 245, 250, 253, 256]}
-            />
-            <SparklineCard
-              title="Low Stock"
-              value="100"
-              changeText="2.1%"
-              isPositive={false}
-              chartColor="#f97316"
-              chartData={[110, 105, 108, 104, 102, 101, 100]}
-            />
-            <SparklineCard
-              title="Total Revenue"
-              value="$78,642"
-              changeText="15.2%"
-              isPositive={true}
-              chartColor="#22c55e"
-              chartData={[68000, 71000, 70000, 74000, 75500, 77000, 78642]}
-            />
+            {sparklineCardsData.map((card) => (
+              <SparklineCard
+                key={card.id}
+                title={card.title}
+                value={card.value}
+                changeText={card.changeText}
+                isPositive={card.isPositive}
+                chartColor={card.chartColor}
+                chartData={card.chartData}
+              />
+            ))}
           </div>
           <div className="bg-white border rounded-5 p-16 mt-12">
             <h4 className="small-text text-dark font-600 mb-12">Revenue & Sales Trends</h4>
@@ -931,20 +757,45 @@ const Product = () => {
         </>
       )}
 
-      {/* Table Area */}
       {activeTab !== "Analytic" && (
         <div className="">
           <Table
-            key={`${activeTab}-${selectedCategory}-${filterTrigger}`}
             title={activeTab}
+            headerSub={getHeaderSub()}
             columns={getTableColumns()}
             data={tableData}
-            total={tableTotal}
-            limit={20}
-            fetchData={handleFetchData}
+            totalItems={tableTotal}
+            itemsPerPage={10}
+            page={currentPage}
+            onPageChange={(p) => setCurrentPage(p)}
+            searchQuery={searchQuery}
+            onSearchChange={(q) => {
+              setSearchQuery(q);
+              setCurrentPage(1);
+            }}
+            showControls={true}
           />
         </div>
       )}
+
+      <CrudModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        title={getModalTitle()}
+        size="sm"
+        type='sidebar'
+        placement='right'
+        fields={getModalFields()}
+        onSubmit={handleAddSubmit}
+      />
+
+      <DeleteModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onDelete={handleConfirmDelete}
+        title="Confirm Delete"
+        message={`Are you sure you want to delete this item? This action cannot be undone.`}
+      />
     </Structure>
   );
 };

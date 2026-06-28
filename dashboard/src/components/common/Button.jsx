@@ -29,6 +29,10 @@ const Button = ({
                 return "px-8 py-3 mini-text rounded-5";
             case "v3":
                 return "w-full small-text py-8 justify-center rounded-5";
+            case "icon":
+            case "none":
+            case "custom":
+                return "rounded-5";
             default:
                 return "w-full py-7 small-text rounded-5";
         }

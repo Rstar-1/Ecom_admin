@@ -2,32 +2,23 @@ import React, { useState } from "react";
 import Container from "../common/Container";
 import Button from "../common/Button";
 import Tab from "../common/Tab";
+import Icon from "../common/Icon";
 
-// Sub-component for rendering Category list items with hover and active states
+// Category list item with CSS hover & active states
 const CategoryItem = ({ cat, selectedItem, onClick, isCollapsed }) => {
-  const [hovered, setHovered] = useState(false);
   const isActive = selectedItem === cat.name;
-
   return (
     <div
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
       onClick={onClick}
-      className={`flex items-center rounded-5 cursor-pointer ${isCollapsed ? "justify-center py-10" : "justify-between p-12"
-        } ${isActive
-          ? "bg-forth text-dark font-600"
-          : (hovered ? "bg-forth text-dark font-500" : "text-gray font-500")
-        }`}
+      className={`flex items-center rounded-5 cursor-pointer transition-all ${
+        isCollapsed ? "justify-center py-10" : "justify-between p-12"
+      } ${isActive ? "bg-forth text-dark font-600" : "text-gray font-500 hover:bg-forth hover:text-dark"}`}
       title={isCollapsed ? cat.name : ""}
     >
       <div className="flex items-center gap-8">
         <div
           className="flex items-center justify-center rounded-5"
-          style={{
-            backgroundColor: cat.color || "#1e74db",
-            width: "24px",
-            height: "24px",
-          }}
+          style={{ backgroundColor: cat.color || "#1e74db", width: 24, height: 24 }}
         >
           <p className="small-text text-white font-500">{cat.name.charAt(0).toUpperCase()}</p>
         </div>
@@ -47,22 +38,18 @@ const Structure = ({
   sidebarItems = [],
   selectedSidebarItem = "",
   onSidebarItemClick = () => {},
-  
   headerIcon,
   headerTitle,
   headerSub,
   quickAction,
-  
   showTabControls = true,
   tabs = [],
   activeTab = "",
   onTabChange = () => {},
-  
   filterDescription = "",
   hasActiveFilters = false,
   onClearAllFilters = () => {},
   filterInputs = null,
-  
   children
 }) => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -77,57 +64,23 @@ const Structure = ({
           style={{
             transition: "width 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
             flexShrink: 0,
-            minWidth: isSidebarCollapsed ? "60px" : "240px"
+            minWidth: isSidebarCollapsed ? 60 : 240
           }}
         >
-          {isSidebarCollapsed ? (
-            <div className="flex justify-center items-center mt-6 mb-12">
-              <Button
-                onClick={() => setIsSidebarCollapsed(false)}
-                bg="forth"
-                color="gray"
-                colorHover="dark"
-                className="rounded-5"
-                style={{
-                  width: "28px",
-                  height: "28px",
-                  padding: 0,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center"
-                }}
-                title={`Expand ${sidebarTitle}`}
-              >
-                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="9 18 15 12 9 6"></polyline>
-                </svg>
-              </Button>
-            </div>
-          ) : (
-            <div className="flex items-center justify-between mt-6 mb-12">
-              <p className="small-text text-dark font-500 uppercase">{sidebarTitle}</p>
-              <Button
-                onClick={() => setIsSidebarCollapsed(true)}
-                bg="forth"
-                color="gray"
-                colorHover="dark"
-                className="rounded-5"
-                style={{
-                  width: "28px",
-                  height: "28px",
-                  padding: 0,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center"
-                }}
-                title={`Collapse ${sidebarTitle}`}
-              >
-                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="15 18 9 12 15 6"></polyline>
-                </svg>
-              </Button>
-            </div>
-          )}
+          <div className={`flex items-center mt-6 mb-12 ${isSidebarCollapsed ? "justify-center" : "justify-between"}`}>
+            {!isSidebarCollapsed && <p className="small-text text-dark font-500 uppercase">{sidebarTitle}</p>}
+            <Button
+              onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+              bg="forth"
+              color="gray"
+              colorHover="dark"
+              className="rounded-5"
+              style={{ width: 28, height: 28, padding: 0, display: "flex", alignItems: "center", justifyContent: "center" }}
+              title={`${isSidebarCollapsed ? "Expand" : "Collapse"} ${sidebarTitle}`}
+            >
+              <Icon name={isSidebarCollapsed ? "ChevronRight" : "ChevronLeft"} width="16" height="16" strokeWidth="2.5" />
+            </Button>
+          </div>
 
           {/* Sidebar Items */}
           <div className="grid gap-4">
@@ -146,10 +99,7 @@ const Structure = ({
         {/* Main Content Area */}
         <div
           className={isSidebarCollapsed ? "w-95" : "w-80"}
-          style={{
-            transition: "width 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
-            minWidth: 0
-          }}
+          style={{ transition: "width 0.25s cubic-bezier(0.4, 0, 0.2, 1)", minWidth: 0 }}
         >
           {/* Sticky Header Section */}
           <div className="sticky top-0 left-0 w-full z-10">
@@ -162,38 +112,24 @@ const Structure = ({
                 )}
                 <div>
                   <h2 className="mid-text text-dark font-500">{headerTitle}</h2>
-                  {headerSub && (
-                    <p className="mini-text text-gray mt-2">{headerSub}</p>
-                  )}
+                  {headerSub && <p className="mini-text text-gray mt-2">{headerSub}</p>}
                 </div>
               </div>
-
-              {quickAction && (
-                <div className="text-right">
-                  {quickAction}
-                </div>
-              )}
+              {quickAction && <div className="text-right">{quickAction}</div>}
             </div>
 
             {/* Tabs and Filters Row */}
             {showTabControls && (
               <div className="bg-white bordb">
-                <Tab
-                  tabs={tabs}
-                  activeTab={activeTab}
-                  onChange={onTabChange}
-                />
+                <Tab tabs={tabs} activeTab={activeTab} onChange={onTabChange} />
 
                 {activeTab !== "Analytic" && (filterDescription || filterInputs || hasActiveFilters) && (
                   <div>
                     <div className="flex items-center justify-between py-12 px-12 bg-white">
-                      <p className="small-text text-gray">
-                        {filterDescription}
-                      </p>
+                      <p className="small-text text-gray">{filterDescription}</p>
                       <div className="flex items-center gap-8">
                         {filterInputs && (
                           <Button
-                            text={showFilters ? "Hide Filters" : "Show Filters"}
                             version="v2"
                             bg={showFilters ? "secondary" : "white"}
                             color={showFilters ? "white" : "secondary"}
@@ -201,9 +137,7 @@ const Structure = ({
                             onClick={() => setShowFilters(!showFilters)}
                             className="flex items-center gap-4"
                           >
-                            <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round" className="flex mr-4">
-                              <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
-                            </svg>
+                            <Icon name="Filter" width="12" height="12" strokeWidth="2.5" className="mr-4" />
                             {showFilters ? "Hide Filters" : "Filters"}
                           </Button>
                         )}
@@ -233,9 +167,7 @@ const Structure = ({
           </div>
 
           {/* Children Content Area */}
-          <div className="p-12">
-            {children}
-          </div>
+          <div className="p-12">{children}</div>
         </div>
       </div>
     </Container>

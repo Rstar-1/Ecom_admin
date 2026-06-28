@@ -1,93 +1,128 @@
 import React from "react";
 
-const Pagination = ({ currentPage, totalPages, onPageChange }) => {
-    const pageNeighbours = 2;
+const Pagination = ({
+    page,
+    totalItems,
+    itemsPerPage,
+    onPageChange,
+    itemName = "items"
+}) => {
+    const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
+    const startItem = totalItems === 0 ? 0 : (page - 1) * itemsPerPage + 1;
+    const endItem = Math.min(page * itemsPerPage, totalItems);
 
-    const getPageNumbers = () => {
-        const totalNumbers = pageNeighbours * 2 + 1; // current + neighbours
-        const totalBlocks = totalNumbers + 2; // adding first and last page
+    if (totalItems === 0) return null;
 
-        if (totalPages > totalBlocks) {
-            let startPage = Math.max(2, currentPage - pageNeighbours);
-            let endPage = Math.min(totalPages - 1, currentPage + pageNeighbours);
-
-            const pages = [];
-
-            // Add left ellipsis
-            if (startPage > 2) pages.push("LEFT_ELLIPSIS");
-            // Add page numbers
-            for (let i = startPage; i <= endPage; i++) pages.push(i);
-            // Add right ellipsis
-            if (endPage < totalPages - 1) pages.push("RIGHT_ELLIPSIS");
-
-            // Always include first and last page
-            return [1, ...pages, totalPages];
+    const handlePageClick = (pNum) => {
+        if (pNum >= 1 && pNum <= totalPages && pNum !== page) {
+            onPageChange(pNum);
         }
-
-        // Less pages than total blocks, show all
-        return Array.from({ length: totalPages }, (_, i) => i + 1);
     };
 
-    const pageNumbers = getPageNumbers();
-
-    const buttonStyle = {
-        border: "1px solid #ddd",
-        width: "32px",
-        padding: '0px',
-        height: "32px",
-        margin: "0 3px",
-        borderRadius: "10%",
+    const btnStyle = {
+        width: "28px",
+        height: "28px",
+        fontSize: "0.775rem",
+        border: "1px solid #ececec",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
         cursor: "pointer",
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontSize: '10px',
-        background: '#fff'
-    };
-
-    const activeButtonStyle = {
-        ...buttonStyle,
-        backgroundColor: "#007bff",
-        color: "#fff",
-        borderColor: "#007bff",
+        transition: "all 0.2s ease",
+        borderRadius: "4px"
     };
 
     return (
-        <div style={{ display: "flex", justifyContent: "end", marginTop: "15px", flexWrap: "wrap" }}>
-            <button
-                style={buttonStyle}
-                onClick={() => currentPage > 1 && onPageChange(currentPage - 1)}
-                disabled={currentPage === 1}
-            >
-                <svg viewBox="0 0 24 24" width="18" height="18" stroke="gray" strokeWidth="2" fill="none" style={{ display: 'flex' }}><polyline points="15 18 9 12 15 6"></polyline></svg>
-            </button>
-
-            {pageNumbers.map((page, index) => {
-                if (page === "LEFT_ELLIPSIS" || page === "RIGHT_ELLIPSIS") {
-                    return (
-                        <span key={index} style={{ padding: "2px 10px", margin: "0 3px" }}>
-                            ...
-                        </span>
-                    );
-                }
-                return (
+        <div className="bg-tertiary mt-4 w-full rounded-5">
+            <div className="flex items-center justify-between p-10">
+                <p className="text-gray mini-text">
+                    Showing {startItem} to {endItem} of {totalItems} {itemName}
+                </p>
+                <div className="flex items-center gap-4">
                     <button
-                        key={index}
-                        style={currentPage === page ? activeButtonStyle : buttonStyle}
-                        onClick={() => onPageChange(page)}
+                        className="bg-white text-gray font-500"
+                        style={{
+                            ...btnStyle,
+                            opacity: page === 1 ? 0.4 : 1,
+                            cursor: page === 1 ? "not-allowed" : "pointer"
+                        }}
+                        disabled={page === 1}
+                        onClick={() => handlePageClick(1)}
+                        title="First Page"
                     >
-                        {page}
+                        &laquo;
                     </button>
-                );
-            })}
-
-            <button
-                style={buttonStyle}
-                onClick={() => currentPage < totalPages && onPageChange(currentPage + 1)}
-                disabled={currentPage === totalPages}
-            >
-                <svg viewBox="0 0 24 24" width="18" height="18" stroke="gray" strokeWidth="2" fill="none" style={{ display: 'flex' }}><polyline points="9 18 15 12 9 6"></polyline></svg>
-            </button>
+                    <button
+                        className="bg-white text-gray font-500"
+                        style={{
+                            ...btnStyle,
+                            opacity: page === 1 ? 0.4 : 1,
+                            cursor: page === 1 ? "not-allowed" : "pointer"
+                        }}
+                        disabled={page === 1}
+                        onClick={() => handlePageClick(page - 1)}
+                        title="Previous Page"
+                    >
+                        &lt;
+                    </button>
+                    {Array.from({ length: totalPages }).map((_, i) => {
+                        const pNum = i + 1;
+                        // Show current page, and a few neighboring pages
+                        if (totalPages > 5 && Math.abs(pNum - page) > 2) {
+                            if (pNum === 1 || pNum === totalPages) {
+                                return (
+                                    <span key={pNum} className="text-gray px-4" style={{ fontSize: "0.775rem" }}>
+                                        ...
+                                    </span>
+                                );
+                            }
+                            return null;
+                        }
+                        const isActive = page === pNum;
+                        return (
+                            <button
+                                key={pNum}
+                                className={isActive ? "bg-primary text-white font-500" : "bg-white text-gray font-500"}
+                                style={{
+                                    ...btnStyle,
+                                    color: isActive ? "#ffffff" : "var(--gray)",
+                                    backgroundColor: isActive ? "var(--primary)" : "#ffffff",
+                                    borderColor: isActive ? "var(--primary)" : "#ececec"
+                                }}
+                                onClick={() => handlePageClick(pNum)}
+                            >
+                                {pNum}
+                            </button>
+                        );
+                    })}
+                    <button
+                        className="bg-white text-gray font-500"
+                        style={{
+                            ...btnStyle,
+                            opacity: page === totalPages ? 0.4 : 1,
+                            cursor: page === totalPages ? "not-allowed" : "pointer"
+                        }}
+                        disabled={page === totalPages}
+                        onClick={() => handlePageClick(page + 1)}
+                        title="Next Page"
+                    >
+                        &gt;
+                    </button>
+                    <button
+                        className="bg-white text-gray font-500"
+                        style={{
+                            ...btnStyle,
+                            opacity: page === totalPages ? 0.4 : 1,
+                            cursor: page === totalPages ? "not-allowed" : "pointer"
+                        }}
+                        disabled={page === totalPages}
+                        onClick={() => handlePageClick(totalPages)}
+                        title="Last Page"
+                    >
+                        &raquo;
+                    </button>
+                </div>
+            </div>
         </div>
     );
 };

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import Structure from "../../components/layout/Structure";
 import Button from "../../components/common/Button";
 import Table from "../../components/common/Table";
@@ -191,15 +191,29 @@ const AI = () => {
     setDateFilter("last-7-days");
   };
 
-  // Table configurations
+  // Table configurations aligned with standard Table.jsx schema
   const recentUsageColumns = [
-    { field: "date", label: "Date" },
-    { field: "model", label: "Model" },
-    { field: "input", label: "Input Tokens" },
-    { field: "output", label: "Output Tokens" },
-    { field: "total", label: "Total Tokens" },
-    { field: "cost", label: "Cost (USD)" },
-    { field: "app", label: "Application" }
+    { header: "Date", accessor: "date", ui: "text", style: { minWidth: "160px" } },
+    {
+      header: "Model",
+      accessor: "model",
+      style: { minWidth: "120px" },
+      render: (row) => (
+        <span className="px-6 py-2 rounded-5 bg-tertiary text-dark font-mono mini-text">
+          {row.model}
+        </span>
+      )
+    },
+    { header: "Input Tokens", accessor: "input", ui: "text", style: { minWidth: "120px" } },
+    { header: "Output Tokens", accessor: "output", ui: "text", style: { minWidth: "120px" } },
+    { header: "Total Tokens", accessor: "total", ui: "text", style: { minWidth: "120px" } },
+    {
+      header: "Cost (USD)",
+      accessor: "cost",
+      style: { minWidth: "100px" },
+      render: (row) => <span className="text-success font-600">{row.cost}</span>
+    },
+    { header: "Application", accessor: "app", ui: "badge", style: { minWidth: "140px" } }
   ];
 
   const initialRecentUsageData = [
@@ -210,7 +224,7 @@ const AI = () => {
     { date: "May 18, 2024 10:05 AM", model: "gpt-4o", input: "4,352,721", output: "2,003,721", total: "6,358,442", cost: "$75.34", app: "Chat App" }
   ];
 
-  const fetchRecentUsageData = async () => {
+  const filteredRecentUsageData = useMemo(() => {
     let raw = initialRecentUsageData;
 
     // Filter by project (sidebar)
@@ -229,27 +243,19 @@ const AI = () => {
       raw = raw.filter(r => r.model === selectedModelFilter);
     }
 
-    const formatted = raw.map(row => ({
-      ...row,
-      model: (
-        <span className="px-6 py-2 rounded-5 bg-tertiary text-dark font-mono mini-text">
-          {row.model}
-        </span>
-      ),
-      cost: <span className="text-success font-600">{row.cost}</span>
-    }));
-
-    return {
-      data: formatted,
-      total: raw.length
-    };
-  };
+    return raw;
+  }, [selectedSidebarItem, selectedModelFilter]);
 
   const appSurchargeColumns = [
-    { field: "name", label: "Application Name" },
-    { field: "requests", label: "Total Requests" },
-    { field: "tokens", label: "Tokens Consumed" },
-    { field: "cost", label: "Cost Share (USD)" }
+    { header: "Application Name", accessor: "name", ui: "text", style: { minWidth: "180px" } },
+    { header: "Total Requests", accessor: "requests", ui: "text", style: { minWidth: "140px" } },
+    { header: "Tokens Consumed", accessor: "tokens", ui: "text", style: { minWidth: "150px" } },
+    {
+      header: "Cost Share (USD)",
+      accessor: "cost",
+      style: { minWidth: "140px" },
+      render: (row) => <span className="font-600 text-dark">{row.cost}</span>
+    }
   ];
 
   const initialAppSurchargeData = [
@@ -258,17 +264,6 @@ const AI = () => {
     { name: "Customer Support", requests: "5,812", tokens: "28.7M", cost: "$340.23" },
     { name: "Mobile App", requests: "2,140", tokens: "7.3M", cost: "$113.67" }
   ];
-
-  const fetchAppSurcharges = async () => {
-    const formatted = initialAppSurchargeData.map(row => ({
-      ...row,
-      cost: <span className="font-600 text-dark">{row.cost}</span>
-    }));
-    return {
-      data: formatted,
-      total: formatted.length
-    };
-  };
 
   return (
     <Structure
@@ -523,20 +518,11 @@ const AI = () => {
           <div className="bg-white border rounded-5 p-16">
             <h4 className="small-text font-600 text-dark mb-16 mt-0">Recent Token Usage Logs</h4>
             <Table
-              key={`${selectedSidebarItem}-${selectedModelFilter}-${dateFilter}`}
               columns={recentUsageColumns}
-              data={initialRecentUsageData.map(row => ({
-                ...row,
-                model: (
-                  <span className="px-6 py-2 rounded-5 bg-tertiary text-dark font-mono mini-text">
-                    {row.model}
-                  </span>
-                ),
-                cost: <span className="text-success font-600">{row.cost}</span>
-              }))}
-              total={5}
-              limit={5}
-              fetchData={fetchRecentUsageData}
+              data={filteredRecentUsageData}
+              totalItems={filteredRecentUsageData.length}
+              itemsPerPage={10}
+              showControls={false}
             />
           </div>
         </>
@@ -599,17 +585,13 @@ const AI = () => {
 
       {activeTab === "Applications" && (
         <div className="bg-white border rounded-5 p-16">
-          <h3 className="mid-text font-600 text-dark pb-5">Active Application Surcharges</h3>
+          <h3 className="mid-text font-600 text-dark pb-12">Active Application Surcharges</h3>
           <Table
-            key="app-surcharges"
             columns={appSurchargeColumns}
-            data={initialAppSurchargeData.map(row => ({
-              ...row,
-              cost: <span className="font-600 text-dark">{row.cost}</span>
-            }))}
-            total={4}
-            limit={10}
-            fetchData={fetchAppSurcharges}
+            data={initialAppSurchargeData}
+            totalItems={initialAppSurchargeData.length}
+            itemsPerPage={10}
+            showControls={false}
           />
         </div>
       )}
